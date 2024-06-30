@@ -13,7 +13,7 @@
 > Blockquote
 
 ![Picture](https://cdn.luogu.com.cn/upload/image_hosting/4m039emz.png)
-[Link](www.bilibili.com)
+
 
 ``` code
 code
