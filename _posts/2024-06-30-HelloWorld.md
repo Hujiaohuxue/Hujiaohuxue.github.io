@@ -1,0 +1,639 @@
+---
+title: 我的算法小抄
+grammar_cjkRuby: true
+category: /小书匠/日记
+---
+# 目录
+[toc]
+
+# 前言
+这个Markdown文件写的是我集训的时候学的算法，模版都在下面了，自己看吧。**多背背，多写一下模版，这样才会进步**
+
+# 一、高精度算法
+## 1.高精度加法
+
+``` c++
+#include <bits/stdc++.h>
+using namespace std;
+string a1,b1;
+int a[1001],b[1001],c[1001];  //
+int la,lb,lc,x=0;  //数字的长度  x是进位 
+int main(){
+	cin>>a1>>b1;
+	la = a1.size();
+	lb = b1.size();
+	for(int i=0;i<=la-1;i++){
+		a[la-i]=a1[i]-'0'; //倒序存储两个高精度的数 
+	}	
+	for(int i=0;i<=lb-1;i++){
+		b[lb-i]=b1[i]-'0';
+	} 
+	lc=1;
+	while(lc<=la || lc<=lb){
+		c[lc] = a[lc]+b[lc]+x;  //c数组去存 
+		x = c[lc]/10;  //存储下一次加法的进位 
+		c[lc]%=10;   
+		lc++;
+	}
+	c[lc]=x;
+	while(c[lc]==0 && lc>1) lc--;  //去掉前导0 
+	for(int i=lc;i>=1;i--){
+		cout<<c[i];
+	} 
+	cout<<endl;
+	return 0;
+}
+```
+
+## 2.高精度减法
+
+``` c++
+#include <iostream>
+#include<cstring>
+using namespace std;
+int main(){
+	//高精度减法 被减数和减数大小不确定，位数不一定相同，可能存在借位 
+	char a1[256],b1[256];
+	//1.输入两个高精度数
+	cin>>a1>>b1; //下标为0存最高位 
+	//2.计算两个高精度数的长度
+	int lena=strlen(a1); 
+	int lenb=strlen(b1);
+	//3.比较大小
+	int flag=0;//0等于  1 a1>b1    -1 a1<b1
+	if(lena>lenb){
+		flag=1;
+	} 
+	else if(lena<lenb){
+		flag=-1;
+	} 
+	else{
+		for(int i=0;i<lena;i++) {
+			if(a1[i] > b1[i]){
+				flag=1;
+				break;
+			}
+			else if(a1[i] < b1[i]){
+				flag=-1;
+				break;
+			} 
+		}
+	}
+	//4.把字符数组倒序存入整形数组中 ，大的存入a中，小数存入b中 
+	int a[256]={0},b[256]={0},c[256]={0}; 
+	if(flag==0){ //两个数相等 
+		cout<<0;
+		return 0; 
+	} 
+	else if(flag==1){ //a1>b1   a1->a   b1->b
+		for(int i=0,j=lena-1 ; i<lena ; i++,j--){ //a[0]存个位 
+			a[i]=a1[j]-'0';
+		}
+		for(int i=0,j=lenb-1 ; i<lenb ; i++,j--){
+			b[i]=b1[j]-'0';
+		} 
+	} 
+	else if(flag==-1){ //a1<b1   b1->a   a1->b 
+		for(int i=0,j=lenb-1 ; i<lenb ;i++,j--){ //a[0]是个位 
+			a[i]=b1[j]-'0';
+		}
+		for(int i=0,j=lena-1 ; i<lena ;i++,j--){
+			b[i]=a1[j]-'0';
+		} 
+		cout<<"-";
+	}
+	//5.高精度数相减，处理借位
+	int len = (lena>lenb?lena:lenb);
+	for(int i=0;i<len;i++){
+		if(a[i]<b[i]){ //处理借位 
+			a[i]=a[i]+10; 
+			a[i+1]--;
+		}
+		c[i]=a[i]-b[i];
+	}
+	//6.删除多余前导0
+	while(c[len-1]==0 && len>1) {
+		len--;
+	}
+	//7.倒序输出 
+	for(int i=len-1;i>=0;i--){
+		cout<<c[i];
+	} 
+	return 0;
+} 
+
+```
+
+## 3.高精度乘法
+
+``` C++
+#include <iostream>
+#include<cstring>
+using namespace std;
+int main(){
+	//高精度乘法
+	char a1[1000],b1[1000];
+	int a[1000]={0},b[1000]={0},c[2000]={0};
+	//1.输入两个高精度数 
+	cin>>a1>>b1; 
+	//2.计算高精度数长度
+	int lena=strlen(a1);
+	int lenb=strlen(b1); 
+	//3.倒序存储在整形数组中
+	for(int i=1,j=lena-1 ; i<=lena ; i++,j--){ //a[1]存个位 
+		a[i]=a1[j]-'0';
+	}
+	for(int i=1,j=lenb-1 ; i<=lenb ;i++,j--){ //b[1]存个位 
+		b[i]=b1[j]-'0';
+	}
+	//4.两个高精度数相乘
+	for(int i=1;i<=lenb;i++){ //遍历b数组 
+		int x=0;//x进位 
+		for(int j=1;j<=lena;j++){ //遍历a数组 
+			c[i+j-1] = a[j]*b[i]+x+c[i+j-1]; 
+			x=c[i+j-1]/10;
+			c[i+j-1]=c[i+j-1]%10; 
+		}
+		c[lena+i]=x;
+	} 
+	int lenc=lena+lenb;
+	//5.删除多余前导0
+	 while(c[lenc]==0 && lenc>1) {
+	 	lenc--;
+	 }
+	 //6.倒序输出c数组
+	for(int i=lenc;i>=1;i--){
+		cout<<c[i];
+	} 
+	return 0;
+}
+```
+
+## 4.高精度除法
+### 高精度除以低精度
+
+``` c++
+#include<iostream>
+#include<cstring>
+using namespace std;
+int main(){
+	char a1[200];
+	int a[200]={0},c[200]={0},b,lena,x=0; //c存商  x余数 
+	//输入高精度数和低精度数 
+	cin>>a1>>b;  //a1[0]存最高位 
+	lena= strlen(a1);
+	//把字符数组正序存入整型数组中 
+	for(int i=0;i<lena;i++){ //a[1]存最高位 
+		a[i+1]=a1[i]-'0'; 
+	} 
+	for(int i=1;i<=lena;i++){
+		c[i]=(x*10+a[i])/b;  //商 
+		x=(x*10+a[i])%b; //余数 
+	} 
+	int lenc=1;//最高位的下标
+	while(c[lenc]==0 && lenc<lena){
+		lenc++;
+	} 
+	for(int i=lenc;i<=lena;i++){ //c[lena]存商的个位 
+		cout<<c[i];
+	}
+	return 0;
+} 
+
+```
+### 高精度除以高精度
+
+``` c++
+#include<iostream>
+#include<cstring> 
+#include<string>
+using namespace std;
+int a[1000]={},b[1000]={},c[1000]={};
+//输入高精度数，并且把高精度数倒序存入整形数组中 
+void init(int a[]){
+	string s;
+	cin>>s;
+	a[0]=s.length();  //下标为0位置存数组的长度 
+	for(int i=1;i<=a[0];i++){ //a[1]存个位 
+		a[i]=s[a[0]-i]-'0';
+	}
+} 
+
+//把p数组的值赋值给q数组，从det个位置开始 
+void numcpy(int p[],int q[],int det){
+	for(int i=1;i<=p[0];i++)
+	{
+		q[i+det-1]=p[i]; 
+	} 
+	q[0]=p[0]+det-1;
+}
+
+//比较函数，比较m数组和n数组的大小
+int compare(int m[],int n[]){
+	if(m[0]>n[0]){
+		return 1;
+	}else if(m[0]<n[0]){
+		return -1;
+	}else{
+		for(int i=m[0];i>0;i--){
+			if(m[i]>n[i]){
+				return 1;
+			}else if(m[i]<n[i]){
+				return -1;
+			}
+		} 
+	} 
+	return 0;
+} 
+
+//减函数
+void jian(int a[],int b[]){
+	int flag=compare(a,b);
+	if(flag==0){
+		a[0]=0;
+		return;
+	}else if(flag==1){
+		for(int i=1;i<=a[0];i++){
+			if(a[i]<b[i]){
+				a[i]+=10;
+				a[i+1]--; 
+			}
+			a[i]-=b[i];
+		}
+		while(a[0]>0&&a[a[0]]==0){
+			a[0]--;
+		}
+		return;
+	}
+} 
+
+//输出函数
+void print(int a[]){
+	if(a[0]==0){
+		cout<<0<<endl;
+		return;
+	}else{
+		for(int i=a[0];i>=1;i--){
+			cout<<a[i];
+		} 
+		cout<<endl;
+		return;
+	} 
+} 
+
+void chugao(int a[],int b[],int c[])
+{
+	int temp[1001]; //临时数组
+	c[0]=a[0]-b[0]+1; //除完结果的最大长度 
+	for(int i=c[0];i>0;i--){
+		memset(temp,0,sizeof(temp)); //temp数组整个初始化为0 
+		numcpy(b,temp,i);//b数组的值赋值给temp数组，从第i位开始 
+		while(compare(a,temp)>=0){ //a>temp 返回1，a<temp返回-1 a==temp返回0 
+			c[i]++; // 
+			jian(a,temp);  //a数组减去temp数组 
+		}
+	} 
+	while(c[0]>0 && c[c[0]]==0) {
+		c[0]--;
+	}
+	return;
+ } 
+int main(){
+	memset(a,0,sizeof(a));
+	memset(b,0,sizeof(b));
+	memset(c,0,sizeof(c));
+	init(a);
+	init(b);
+	chugao(a,b,c);
+	print(c);
+	print(a); 
+	return 0;
+}
+```
+## 5.比较高精度数的大小(示例)
+
+``` c++
+#include <iostream>
+#include<cstring>
+using namespace std;
+int main(){
+	//比较两个高精度数的大小 
+	char a1[1000],b1[1000];
+	//1.输入两个高精度数
+	cin>>a1>>b1; //下标为0存最高位 
+	//2.计算两个高精度数的长度
+	int lena=strlen(a1); 
+	int lenb=strlen(b1);
+	//3.比较大小
+	int flag=0;//0等于  1 a1>b1    -1 a1<b1
+	if(lena>lenb){
+		flag=1;
+	} else if(lena<lenb){
+		flag=-1;
+	} else{
+		for(int i=0;i<lena;i++) {
+			if(a1[i] > b1[i]){
+				flag=1;
+				break;
+			}else if(a1[i] < b1[i]){
+				flag=-1;
+				break;
+			} 
+		}
+	}
+	if(flag==0)  cout<<"相等";
+	else if(flag==1)  cout<<"第一个数大";
+	else if(flag==-1)  cout<<"第二个数大"; 
+	return 0;
+} 
+
+```
+
+# 二、排序算法
+## 1.冒泡排序
+算法说明：冒泡排序就是重复从序列左边开始比较相邻两个数字的大小，再根据结交换两个数字的位置”这一操作的算法。在这个过程中，数字会像泡泡一样，慢慢从左往右“浮”到序列的顶端，所以这个算法才被称为“冒泡排序”。
+
+``` c++
+#include <bits/stdc++.h>
+using namespace std;
+unsigned long long a[114514],n;
+int main(){
+	cin>>n;
+	for(int i = 1;i <= n;i++){  //将排序的数放到数组 
+		cin>>a[i];
+	} 
+	for(int i = n - 1;i >= 1;i--){  //进行n-1次 
+		for(int j = 1;i <= i;j++){  //每轮进行i次的比较 
+			if(a[j] > a[j + 1]){
+				swap(a[j],a[j + 1]);
+			} 
+		} 
+	}
+	for(int i = 1;i <= n;i++){  //输出 
+		cout<<a[i];
+	} 
+	return 0;
+} 
+```
+## 2.桶排序
+
+``` c++
+#include <bits/stdc++.h>
+using namespace std;
+int a[11];  //准备10个桶
+int main(){
+	memset(a,0,sizeof(a));  //将数组初始化为0 
+	int n,temp;
+	cin>>n;
+	
+	for(int i=1;i<=n;i++) {
+		cin>>temp;
+		a[temp]++;  //统计出现的次数 
+	}
+
+	for(int i=1;i<=10;i++){
+		cout<<a[i]<<" ";
+	}  
+	return 0;
+}
+
+```
+## 3.STL？！！！！
+
+``` c++
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+int n,a[100001];
+signed main(){
+	cin>>n;
+	for (int i=1;i<=n;i++) cin>>a[i];
+	sort(a+1,a+n+1);
+	for (int i=1;i<=n;i++) cout<<a[i]<<' '; 
+	return 0;
+}
+```
+
+## 4.快速排序
+
+``` c++
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+int n,a[100001],b[100001],c[100001],d[100001];
+void quick_sort(int l,int r){
+	if (l>=r) return;
+	int mid=rand()%(r-l+1)+l;//This value is random.
+	int tb=0,tc=0,td=0;//b is smaller than a[mid],c is bigger than it,d is the same of it.
+	for (int i=l;i<=r;i++){
+		if (a[i]<a[mid]) b[++tb]=a[i];
+		else if (a[i]>a[mid]) c[++tc]=a[i];
+		else d[++td]=a[i];
+	}
+	for (int i=1;i<=tb;i++) a[l+i-1]=b[i];
+	for (int i=1;i<=td;i++) a[l+i-1+tb]=d[i];
+	for (int i=1;i<=tc;i++) a[l+i-1+tb+td]=c[i];
+	quick_sort(l,l+tb-1);
+	quick_sort(l+tb+td,r);
+}
+signed main(){
+	srand((int)time(0));
+	cin>>n;
+	for (int i=1;i<=n;i++) cin>>a[i];
+	quick_sort(1,n);
+	for (int i=1;i<=n;i++) cout<<a[i]<<' ';
+	return 0;
+}
+```
+# 四、递归(此处只展示一些经典例子)
+## 1.最大公约数与最小公倍数
+
+``` c++
+#include <bits/stdc++.h>
+using namespace std;
+
+long long gcd(long long a, long long b) { // 定义最大公约数计算函数（使用辗转相除法）
+    if (b == 0) return a; // 当b为0时，a即为最大公约数
+    return gcd(b, a % b); // 递归调用gcd函数，将a替换为b，b替换为a除以b的余数
+}
+
+long long lcm(long long a, long long b) { // 定义最小公倍数计算函数（根据公式：两数乘积除以它们的最大公约数于最小公倍数）
+    return a * b / gcd(a, b); // 返回两数乘积除以其最大公约数的结果
+}
+
+int main() {
+    long long a, b; // 读取两个整数a和b
+    cin >> a >> b;
+    cout << gcd(a, b) << " " << lcm(a, b); // 计算并输出最大公约数和最小公倍数，两者之间用空格分隔
+    return 0;
+}
+
+```
+
+# 五、递推(DP动态规划，和上面一样，只列举一些例子)
+## 1.洛谷P1255——数楼梯(不考虑高精度)
+
+``` c++
+#include <bits/stdc++.h>
+using namespace std;
+int main(){
+	unsigned long long x;
+	cin>>x;
+	unsigned long long a[x+1];
+    a[0]=0;
+	a[1]=1;
+	for(int i=2;i<=x+1;++i){
+		a[i]=a[i-1]+a[i-2];  //DP状态转移方程
+	} 
+	if(x==0){
+		cout<<0;//特判 不然90
+	} 
+    else{
+		cout<<a[x+1];
+	} 
+	return 0;
+}
+```
+
+# 6.搜索与回溯
+## 1.DFS(深度优先搜索)
+例：
+
+``` c++
+#include<bits/stdc++.h>
+using namespace std;
+
+int a[10],book[10],n;
+//dfs(Depth First Search，深度优先搜索 
+void dfs(int step){   //Step表示站在第几个盒子面前 
+	int i; 
+	if(step == n + 1){
+	/*
+	第十三行的解释：
+		如果站第n+1个盒子当中，则表示前n个盒子已经放好牌 
+		step == n + 1 可以替换成 step > n 
+	*/
+	
+		for(int i = 1;i <= n;i++){
+			cout<<a[i];
+		} 
+		cout<<endl;
+		return;  //返回之前的一步(最近一次调用Dfs函数的地方) 
+	}
+	
+	/*
+	此时站在第step个盒子前面，应该放那张牌呢？
+	按照1、2、3......n的顺序一一尝试
+	*/
+	for(int i = 1;i <= n;i++){
+		//判牌i是否还在手上
+		if(book[i] == 0){  //book[i] = 0表示i号扑克牌在手上 
+			//开始尝试使用牌
+			a[step] = i;  //将i号牌放到step号盒子里 
+			book[i] = i;  //将book[i]设置为1，表示i号牌不在手上 
+			//第step个盒子已经放好扑克牌，接下来要走到下一个盒子面前
+			dfs(step + 1);  //通过递归来调用自己
+			book[1] = 0;    //这是非常重要的一步，一定要将刚才的牌收回，才可以进行下一次尝试 
+		} 
+	} 
+	 
+	
+
+} 
+
+int main(){
+	int n;
+	cin>>n;  //注意n是1-9之间的整数
+	dfs(1);  //首先站到一号盒子面前 
+	return 0;
+}
+
+```
+
+### 洛谷“选数”
+# [NOIP2002 普及组] 选数
+
+## 题目描述
+
+已知 $n$ 个整数 $x_1,x_2,\cdots,x_n$，以及 $1$ 个整数 $k$（$k<n$）。从 $n$ 个整数中任选 $k$ 个整数相加，可分别得到一系列的和。例如当 $n=4$，$k=3$，$4$ 个整数分别为 $3,7,12,19$ 时，可得全部的组合与它们的和为：
+
+$3+7+12=22$
+
+$3+7+19=29$
+
+$7+12+19=38$
+
+$3+12+19=34$
+
+现在，要求你计算出和为素数共有多少种。
+
+例如上例，只有一种的和为素数：$3+7+19=29$。
+
+## 输入格式
+
+第一行两个空格隔开的整数 $n,k$（$1 \le n \le 20$，$k<n$）。
+
+第二行 $n$ 个整数，分别为 $x_1,x_2,\cdots,x_n$（$1 \le x_i \le 5\times 10^6$）。
+
+## 输出格式
+
+输出一个整数，表示种类数。
+
+## 样例 #1
+
+### 样例输入 #1
+
+```
+4 3
+3 7 12 19
+```
+
+### 样例输出 #1
+
+```
+1
+```
+
+## 提示
+
+**【题目来源】**
+
+NOIP 2002 普及组第二题
+
+``` c++
+#include<iostream>
+
+using namespace std;
+int a[30], book[30];
+int n, k, cnt = 0;
+
+bool Judge(int x){
+	for(int i = 2; i*i <= x; i++){
+		if(x % i == 0) return false;
+	}
+	return true;
+}
+
+void dfs(int cur, int sum, int t){
+	if(cur == k){
+		if(Judge(sum)) cnt++;
+		return;
+	}
+	for(int i = t; i < n; i++){
+		dfs(cur+1, sum+a[i], i+1);
+	}
+	return;
+}
+
+int main(){
+	fill(book, book + 30, 0);
+	cin >> n >> k;
+	for(int i = 0; i < n; i++){
+		cin >> a[i]; 
+	}
+	dfs(0, 0, 0);
+	cout << cnt << endl;
+	return 0;
+} 
+
+```
