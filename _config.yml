@@ -16,7 +16,7 @@ timezone:
 
 title: Hujiaohuxue # the main title
 
-tagline: 这是hujiaohuxue网站 # it will display as the sub-title
+tagline: hujiaohuxue # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   A minimal, responsive and feature-rich Jekyll theme for technical writing.
@@ -41,7 +41,7 @@ social:
     - https://twitter.com/username # change to your twitter homepage
     - https://github.com/username # change to your github homepage
     # Uncomment below to add more social links
-     - https://space.bilibili.com/1292719049
+  
     # - https://www.linkedin.com/in/username
 
 # Site Verification Settings
